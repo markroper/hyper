@@ -581,6 +581,20 @@ where
         }
     }
 
+    /// Force cleanup of write buffers to prevent memory leaks
+    pub(super) fn force_cleanup(&mut self) {
+        // Replace large headers buffer with small one to release capacity
+        if self.headers.bytes.capacity() > INIT_BUFFER_SIZE * 4 {
+            self.headers.bytes = Vec::with_capacity(INIT_BUFFER_SIZE);
+        } else {
+            self.headers.bytes.clear();
+        }
+        self.headers.pos = 0;
+        
+        // Clear queue
+        self.queue = BufList::new();
+    }
+
     fn headers_mut(&mut self) -> &mut Cursor<Vec<u8>> {
         debug_assert!(!self.queue.has_remaining());
         &mut self.headers

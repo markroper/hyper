@@ -130,6 +130,10 @@ where
             if let Some(mut body) = self.body_tx.take() {
                 body.send_error(crate::Error::new_body("connection error"));
             }
+            // Force cleanup of connection buffers to prevent memory leak on IncompleteMessage
+            if e.is_incomplete_message() {
+                self.conn.force_buffer_cleanup();
+            }
             // An error means we're shutting down either way.
             // We just try to give the error to the user,
             // and close the connection with an Ok. If we

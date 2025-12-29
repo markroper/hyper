@@ -890,6 +890,11 @@ where
         }
     }
 
+    /// Force cleanup of write buffers to prevent memory leaks on connection errors
+    pub(crate) fn force_buffer_cleanup(&mut self) {
+        self.io.write_buf().force_cleanup();
+    }
+
     pub(super) fn on_upgrade(&mut self) -> crate::upgrade::OnUpgrade {
         trace!("{}: prepare possible HTTP upgrade", T::LOG);
         self.state.prepare_upgrade()
